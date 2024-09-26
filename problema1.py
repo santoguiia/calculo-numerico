@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 def sinc(x):
     return np.sin(x) / x
 
+def sinc_deriv(x):
+    return (x * np.cos(x) - np.sin(x)) / (x ** 2)
+
 def plot_sinc(x, y):
     plt.figure(figsize=(8, 6))
     plt.plot(x, y, label='sinc(x)')
@@ -51,6 +54,28 @@ def falsa_posição(f, a, b, tol=1e-6, max_iter=100):
             a = c
     return c, iteracoes, erros
 
+def newton(f, df, x0, tol=1e-6, max_iter=100):
+    iteracoes = []
+    erros = []
+    x = x0
+    
+    for i in range(max_iter):
+        fx = f(x)
+        dfx = df(x)
+        
+        if abs(dfx) < tol:  # Evitar divisão por zero
+            raise ValueError("Derivada muito próxima de zero")
+        
+        iteracoes.append(x)
+        erros.append(abs(fx))
+        
+        if abs(fx) < tol:
+            return x, iteracoes, erros
+        
+        x = x - fx / dfx
+    
+    return x, iteracoes, erros
+
 def mostrar_resultados(raiz, iteracoes, erros):
     print(f"Raiz: {raiz}")
     print(f"Iterações: {len(iteracoes)}")
@@ -71,6 +96,14 @@ def main():
     print("\nMétodo da falsa posição de sinc(x) no intervalo" f"[{a}, {b}]")
     raiz_falsa_posicao, iteracoes_falsa_posicao, erros_falsa_posicao = falsa_posição(sinc, a, b)
     mostrar_resultados(raiz_falsa_posicao, iteracoes_falsa_posicao, erros_falsa_posicao)
+
+    x0 = 3.5  # Chute inicial
+    print("\nMétodo de Newton-Raphson de sinc(x) com chute inicial" f" x0 = {x0}")
+    try:
+        raiz_newton, iteracoes_newton, erros_newton = newton(sinc, sinc_deriv, x0)
+        mostrar_resultados(raiz_newton, iteracoes_newton, erros_newton)
+    except ValueError as e:
+        print(f"Erro no método de Newton: {e}")
 
 if __name__ == "__main__":
     main()
